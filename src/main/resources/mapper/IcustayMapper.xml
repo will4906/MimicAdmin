@@ -94,8 +94,18 @@
         UPDATE ${project_name} SET ${field_name} = mv.amount + ${field_name} FROM mv WHERE mv.icustay_id = ${project_name}.icustay_id;
     </update>
 
+    <update id="addSumOutputeventOutput">
+        WITH out AS (
+            SELECT o.icustay_id, SUM(o.value) AS output FROM outputevents AS o, ${project_name}
+            WHERE o.icustay_id = ${project_name}.icustay_id
+            GROUP BY o.icustay_id
+        )
+        UPDATE ${project_name} SET output = out.output FROM out WHERE ${project_name}.icustay_id = out.icustay_id;
+    </update>
 
-
+    <update id="addSelfCustomCondition">
+        UPDATE ${project_name} SET ${field_name} = ${condition};
+    </update>
 
 
 </mapper>

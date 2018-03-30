@@ -97,4 +97,18 @@ public interface IcustayMapper {
      * @param condition 条件
      */
     void addSumInputeventMvValue(@Param("project_name")String projectName, @Param("field_name")String fieldName, @Param("condition")String condition);
+
+    /**
+     * 添加outputevents总输出
+     * @param projectName 表名
+     */
+    void addSumOutputeventOutput(@Param("project_name")String projectName);
+
+    /**
+     * 自行定义修改
+     * @param projectName
+     * @param fieldName
+     * @param condition
+     */
+    void addSelfCustomCondition(@Param("project_name")String projectName, @Param("field_name")String fieldName, @Param("condition")String condition);
 }

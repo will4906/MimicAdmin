@@ -52,11 +52,16 @@ public class ARDS {
 //            project.addRelatedData("ph_mean");
 //            project.addRelatedData("vent_hours");
 //            project.addRelatedData("pco2_mean");
+//            project.addRelatedData("pao2_mean");
+//            project.addRelatedData("fio2_mean");
 //            project.addRelatedData("peep_max");
 //            project.addRelatedData("plateau_pressure_max");
+//            project.addRelatedData("plateau_pressure_min");
+//            project.addRelatedData("tidalvolume_mean");
 //            project.addRelatedData("heartrate_mean");
 //            project.addRelatedData("resprate_mean");
 //            project.addRelatedData("map_min");
+//            project.addRelatedData("spo2_mean");
 //            project.addRelatedData("rrt");
 //            project.addRelatedData("hemoglobin_mean");
 //            project.addRelatedData("temperature_max");
@@ -74,7 +79,21 @@ public class ARDS {
 //            project.addRelatedData("plasma");
 //            project.addRelatedData("cryoprecipitate");
 //            project.addRelatedData("albumin_drup");
-            project.addRelatedData("mean_airway_press_min");
+//            project.addRelatedData("mean_airway_press_min");
+//            String[] codeStatus = new String[]{"fullcode_first", "cmo_first", "dnr_first", "dni_first", "dncpr_first",
+//            "fullcode_last", "cmo_last", "dnr_last", "dni_last", "dncpr_last", "fullcode", "cmo", "dnr", "dni", "dncpr",
+//            "cmo_ds", "timednr_chart", "timecmo_chart", "timecmo_nursingnote"};
+//            for (String cs : codeStatus){
+//                project.addRelatedData(cs);
+//            }
+//            project.addRelatedData("hosp_mort_30day");
+//            project.addRelatedData("hosp_mort_1yr");
+//            project.addRelatedData("output");
+//            project.addRelatedData("output_input");
+//            project.addRelatedData("pao2fio2");
+//            project.addRelatedData("oxygenation_index");
+//            project.addRelatedData("aecc_level");
+            project.addRelatedData("pfio2");
             sqlSession.commit();
         } catch (Exception ex) {
             System.out.println(ex.toString());

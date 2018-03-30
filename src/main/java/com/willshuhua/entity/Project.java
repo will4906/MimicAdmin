@@ -4,9 +4,12 @@ import com.willshuhua.dao.HadmMapper;
 import com.willshuhua.dao.IcustayMapper;
 import com.willshuhua.dao.ProjectMapper;
 import com.willshuhua.dao.SubjectMapper;
+import com.willshuhua.util.PythonUtil;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.ibatis.session.SqlSession;
+
+import java.io.IOException;
 
 public class Project {
 
@@ -51,7 +54,7 @@ public class Project {
         return this.projectMapper.deleteInstance(this.projectName, condition);
     }
 
-    public void addRelatedData(String fieldName){
+    public void addRelatedData(String fieldName) throws IOException, InterruptedException {
         switch (fieldName){
             case "age":
                 this.projectMapper.addField(this.projectName, fieldName, "NUMERIC");
@@ -125,6 +128,14 @@ public class Project {
             case "pco2_mean":
                 this.projectMapper.addField(this.projectName, fieldName, "NUMERIC");
                 this.hadmMapper.addLabeventAverValue(this.projectName, fieldName, "itemid = 50818");
+                break;
+            case "pao2_mean":
+                this.projectMapper.addField(this.projectName, fieldName, "NUMERIC");
+                this.hadmMapper.addLabeventAverValue(this.projectName, fieldName, "itemid = 50821 and valuenum <= 800");
+                break;
+            case "fio2_mean":
+                this.projectMapper.addField(this.projectName, fieldName, "NUMERIC");
+                this.hadmMapper.addLabeventAverValue(this.projectName, fieldName, "itemid = 50816 and valuenum <= 100 and valuenum >= 20");
                 break;
             case "peep_max":
                 this.projectMapper.addField(this.projectName, fieldName, "INT");
@@ -211,6 +222,10 @@ public class Project {
                 this.projectMapper.addField(this.projectName, fieldName, "NUMERIC");
                 this.icustayMapper.addMaxCharteventValue(this.projectName, fieldName, "itemid = 543");
                 break;
+            case "plateau_pressure_min":
+                this.projectMapper.addField(this.projectName, fieldName, "NUMERIC");
+                this.icustayMapper.addMinCharteventValue(this.projectName, fieldName, "itemid = 543");
+                break;
             case "heartrate_mean":
                 this.projectMapper.addField(this.projectName, fieldName, "NUMERIC");
                 this.icustayMapper.addAverCharteventValue(this.projectName, fieldName, "itemid in (211,220045) and valuenum > 0 and valuenum < 300");
@@ -222,6 +237,10 @@ public class Project {
             case "map_min":
                 this.projectMapper.addField(this.projectName, fieldName, "NUMERIC");
                 this.icustayMapper.addMinCharteventValue(this.projectName, fieldName, "itemid in (456,52,6702,443,220052,220181,225312)");
+                break;
+            case "spo2_mean":
+                this.projectMapper.addField(this.projectName, fieldName, "NUMERIC");
+                this.icustayMapper.addAverCharteventValue(this.projectName, fieldName, "itemid in (646, 220277) AND valuenum > 0 AND valuenum <= 100");
                 break;
             case "map":
                 this.projectMapper.addField(this.projectName, fieldName, "NUMERIC");
@@ -262,7 +281,78 @@ public class Project {
                 this.projectMapper.addField(this.projectName, fieldName, "NUMERIC");
                 this.icustayMapper.addMinCharteventValue(this.projectName, fieldName, "itemid IN (444, 1672, 224697)");
                 break;
+//          下方参数需执行https://github.com/MIT-LCP/mimic-code/blob/master/concepts/code-status.sql
+            case "fullcode_first": 
+            case "cmo_first":
+            case "dnr_first":
+            case "dni_first":
+            case "dncpr_first":
+            case "fullcode_last":
+            case "cmo_last":
+            case "dnr_last":
+            case "dni_last":
+            case "dncpr_last":
+            case "fullcode":
+            case "cmo":
+            case "dnr":
+            case "dni":
+            case "dncpr":
+            case "cmo_ds":
+                this.projectMapper.addField(this.projectName, fieldName, "INT4");
+                this.icustayMapper.addCustomValue(this.projectName, "code_status", fieldName);
+                break;
+            case "timednr_chart":
+            case "timecmo_chart":
+            case "timecmo_nursingnote":
+                this.projectMapper.addField(this.projectName, fieldName, "timestamp");
+                this.icustayMapper.addCustomValue(this.projectName, "code_status", fieldName);
+                break;
+            case "hosp_mort_30day":
+                this.projectMapper.addField(this.projectName, fieldName, "INT2");
+                this.hadmMapper.addHospitalDeathDays(this.projectName, fieldName, "'30'");
+                break;
+            case "hosp_mort_1yr":
+                this.projectMapper.addField(this.projectName, fieldName, "INT2");
+                this.hadmMapper.addHospitalDeathDays(this.projectName, fieldName, "'365'");
+                break;
+            case "output":
+                this.projectMapper.addField(this.projectName, fieldName, "NUMERIC");
+                this.icustayMapper.addSumOutputeventOutput(this.projectName);
+                break;
+            case "output_input":
+                this.projectMapper.addField(this.projectName, fieldName, "NUMERIC");
+                this.icustayMapper.addSelfCustomCondition(this.projectName, fieldName, "output - input");
+                break;
+            case "pao2fio2":
+                this.projectMapper.addField(this.projectName, fieldName, "NUMERIC");
+//                好像跑python代码有问题，建议直接调用Python文件
+                PythonUtil.doPython("res/python/pao2fio2.py", new String[]{this.projectName});
+//                this.icustayMapper.addSelfCustomCondition(this.projectName, fieldName, "output - input");
+                break;
+            case "pfio2":
+                this.projectMapper.addField(this.projectName, fieldName, "NUMERIC");
+//                好像跑python代码有问题，建议直接调用Python文件
+//                PythonUtil.doPython("res/python/fio2.py", new String[]{this.projectName});
+//                this.icustayMapper.addSelfCustomCondition(this.projectName, fieldName, "output - input");
+                break;
+            case "oxygenation_index":
+                this.projectMapper.addField(this.projectName, fieldName, "NUMERIC");
+                this.icustayMapper.addSelfCustomCondition(this.projectName, fieldName, "mean_airway_press_min * pao2fio2");
+                break;
+            case "aecc_level":
+                this.projectMapper.addField(this.projectName, fieldName, "NUMERIC");
+                this.icustayMapper.addSelfCustomCondition(this.projectName, fieldName,
+                        "(CASE " +
+                                "WHEN oxygenation_index < 300 AND oxygenation_index > 200 THEN 1 " +
+                                "WHEN oxygenation_index <= 200 THEN 2 " +
+                                "WHEN oxygenation_index >= 300 THEN 0 " +
+                                "END )");
+                break;
+            case "apps":
+                this.projectMapper.addField(this.projectName, fieldName, "INT");
+                break;
             default:
+                System.out.println("暂未支持：" + fieldName);
                 break;
         }
     }

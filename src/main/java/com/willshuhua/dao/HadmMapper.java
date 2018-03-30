@@ -71,4 +71,13 @@ public interface HadmMapper {
      * @param fieldName 字段
      */
     void addElixhauserAhrqValue(@Param("project_name")String projectName, @Param("field_name")String fieldName);
+
+    /**
+     * 根据天数添加是否死亡
+     * @param projectName 表名
+     * @param fieldName 字段
+     * @param days 天数
+     */
+    void addHospitalDeathDays(@Param("project_name")String projectName, @Param("field_name")String fieldName, @Param("days")String days);
+
 }
