@@ -1,9 +1,6 @@
 package com.willshuhua.entity;
 
-import com.willshuhua.dao.HadmMapper;
-import com.willshuhua.dao.IcustayMapper;
-import com.willshuhua.dao.ProjectMapper;
-import com.willshuhua.dao.SubjectMapper;
+import com.willshuhua.dao.*;
 import com.willshuhua.util.PythonUtil;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,6 +19,7 @@ public class Project {
     private HadmMapper hadmMapper = null;
     private SubjectMapper subjectMapper = null;
     private IcustayMapper icustayMapper = null;
+    private SelfMapper selfMapper = null;
 
     public Project(){}
 
@@ -31,6 +29,7 @@ public class Project {
         this.hadmMapper = this.sqlSession.getMapper(HadmMapper.class);
         this.subjectMapper = this.sqlSession.getMapper(SubjectMapper.class);
         this.icustayMapper = this.sqlSession.getMapper(IcustayMapper.class);
+        this.selfMapper = this.sqlSession.getMapper(SelfMapper.class);
     }
 
     public Project(String projectName, SqlSession sqlSession){
@@ -321,14 +320,15 @@ public class Project {
                 break;
             case "output_input":
                 this.projectMapper.addField(this.projectName, fieldName, "NUMERIC");
-                this.icustayMapper.addSelfCustomCondition(this.projectName, fieldName, "output - input");
+                this.selfMapper.addSelfCustomCondition(this.projectName, fieldName, "output - input");
                 break;
             case "pao2fio2":
                 this.projectMapper.addField(this.projectName, fieldName, "NUMERIC");
 //                好像跑python代码有问题，建议直接调用Python文件
-                PythonUtil.doPython("res/python/pao2fio2.py", new String[]{this.projectName});
+//                PythonUtil.doPython("res/python/pao2fio2.py", new String[]{this.projectName});
 //                this.icustayMapper.addSelfCustomCondition(this.projectName, fieldName, "output - input");
                 break;
+//                计算pao2fio2时的fio2
             case "pfio2":
                 this.projectMapper.addField(this.projectName, fieldName, "NUMERIC");
 //                好像跑python代码有问题，建议直接调用Python文件
@@ -337,11 +337,11 @@ public class Project {
                 break;
             case "oxygenation_index":
                 this.projectMapper.addField(this.projectName, fieldName, "NUMERIC");
-                this.icustayMapper.addSelfCustomCondition(this.projectName, fieldName, "mean_airway_press_min * pao2fio2");
+                this.selfMapper.addSelfCustomCondition(this.projectName, fieldName, "mean_airway_press_min * pao2fio2");
                 break;
             case "aecc_level":
                 this.projectMapper.addField(this.projectName, fieldName, "NUMERIC");
-                this.icustayMapper.addSelfCustomCondition(this.projectName, fieldName,
+                this.selfMapper.addSelfCustomCondition(this.projectName, fieldName,
                         "(CASE " +
                                 "WHEN oxygenation_index < 300 AND oxygenation_index > 200 THEN 1 " +
                                 "WHEN oxygenation_index <= 200 THEN 2 " +
@@ -350,10 +350,27 @@ public class Project {
                 break;
             case "apps":
                 this.projectMapper.addField(this.projectName, fieldName, "INT");
+                this.selfMapper.addSelfApps(this.projectName);
+                break;
+            case "spo2fio2":
+                this.projectMapper.addField(this.projectName, fieldName, "NUMERIC");
+//                此处调用python spo2fio2.py project_name
+                break;
+            case "osi":
+                this.projectMapper.addField(this.projectName, fieldName, "NUMERIC");
+                this.selfMapper.addSelfCustomCondition(this.projectName, fieldName, "mean_airway_press_min * spo2fio2");
+                break;
+            case "bmi":
+                this.projectMapper.addField(this.projectName, fieldName, "NUMERIC");
+                this.icustayMapper.addCustomConditionSetValue(this.projectName, "heightweight", "ROUND(heightweight.weight_first / POWER(heightweight.height_first / 100, 2) , 2)", fieldName, "1=1");
                 break;
             default:
                 System.out.println("暂未支持：" + fieldName);
                 break;
         }
+    }
+
+    public void addSpo2Fio2(){
+
     }
 }

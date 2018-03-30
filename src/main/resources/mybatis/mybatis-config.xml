@@ -18,5 +18,6 @@
         <mapper resource="mapper/HadmMapper.xml"/>
         <mapper resource="mapper/SubjectMapper.xml"/>
         <mapper resource="mapper/IcustayMapper.xml"/>
+        <mapper resource="mapper/SelfMapper.xml"/>
     </mappers>
 </configuration>

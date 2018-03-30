@@ -105,10 +105,12 @@ public interface IcustayMapper {
     void addSumOutputeventOutput(@Param("project_name")String projectName);
 
     /**
-     * 自行定义修改
+     * 自定义的计算
      * @param projectName
+     * @param source
+     * @param expression
      * @param fieldName
      * @param condition
      */
-    void addSelfCustomCondition(@Param("project_name")String projectName, @Param("field_name")String fieldName, @Param("condition")String condition);
+    void addCustomConditionSetValue(@Param("project_name")String projectName, @Param("source")String source, @Param("expression")String expression, @Param("field_name")String fieldName, @Param("condition")String condition);
 }

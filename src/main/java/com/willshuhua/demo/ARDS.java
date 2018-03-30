@@ -93,7 +93,13 @@ public class ARDS {
 //            project.addRelatedData("pao2fio2");
 //            project.addRelatedData("oxygenation_index");
 //            project.addRelatedData("aecc_level");
-            project.addRelatedData("pfio2");
+//            project.addRelatedData("pfio2");
+//            project.addRelatedData("apps");
+//            project.addRelatedData("spo2fio2");
+//            project.addRelatedData("osi");
+//            project.addRelatedData("bmi");
+//            System.out.println("删除mean_airway_press为空的人，共" + project.deleteInstance("mean_airway_press_min IS NULL") + "个");
+//            System.out.println("删除apps为空的人，共" + project.deleteInstance("apps IS NULL") + "个");
             sqlSession.commit();
         } catch (Exception ex) {
             System.out.println(ex.toString());

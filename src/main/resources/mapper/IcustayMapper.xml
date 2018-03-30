@@ -103,8 +103,11 @@
         UPDATE ${project_name} SET output = out.output FROM out WHERE ${project_name}.icustay_id = out.icustay_id;
     </update>
 
-    <update id="addSelfCustomCondition">
-        UPDATE ${project_name} SET ${field_name} = ${condition};
+    <update id="addCustomConditionSetValue">
+        UPDATE ${project_name}
+        SET ${field_name} = ${expression}
+        FROM ${source}
+        WHERE ${project_name}.icustay_id = ${source}.icustay_id AND ${condition}
     </update>
 
 
