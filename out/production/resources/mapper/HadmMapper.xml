@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.willshuhua.dao.HadmMapper">
+
+    <update id="addDefaultEthnicity">
+        UPDATE ${project_name}
+                SET ethnicity = (
+                    CASE admissions.ethnicity
+                        WHEN 'UNKNOWN/NOT SPECIFIED' THEN 0 WHEN 'BLACK/HAITIAN' THEN 1 WHEN 'BLACK/AFRICAN AMERICAN' THEN 2
+                        WHEN 'ASIAN - ASIAN INDIAN' THEN 3 WHEN 'WHITE - RUSSIAN' THEN 4 WHEN 'ASIAN - OTHER' THEN 5
+                        WHEN 'HISPANIC/LATINO - DOMINICAN' THEN 6 WHEN 'WHITE - OTHER EUROPEAN' THEN 7
+                        WHEN 'HISPANIC/LATINO - GUATEMALAN' THEN 8 WHEN 'ASIAN - CHINESE' THEN 9
+                        WHEN 'BLACK/AFRICAN' THEN 10 WHEN 'WHITE' THEN 11 WHEN 'HISPANIC/LATINO - HONDURAN' THEN 12
+                        WHEN 'UNABLE TO OBTAIN' THEN 13 WHEN 'HISPANIC OR LATINO' THEN 14 WHEN 'ASIAN - CAMBODIAN' THEN 15
+                        WHEN 'MIDDLE EASTERN' THEN 16 WHEN 'HISPANIC/LATINO - PUERTO RICAN' THEN 17 WHEN 'ASIAN' THEN 18
+                        WHEN 'AMERICAN INDIAN/ALASKA NATIVE' THEN 19 WHEN 'PATIENT DECLINED TO ANSWER' THEN 20
+                        WHEN 'ASIAN - VIETNAMESE' THEN 21 WHEN 'HISPANIC/LATINO - SALVADORAN' THEN 22
+                        WHEN 'PORTUGUESE' THEN 23 WHEN 'MULTI RACE ETHNICITY' THEN 24 WHEN 'BLACK/CAPE VERDEAN' THEN 25
+                        WHEN 'OTHER' THEN 26 WHEN 'ASIAN - FILIPINO' THEN 27 WHEN 'WHITE - EASTERN EUROPEAN' THEN 28
+                        WHEN 'WHITE - BRAZILIAN' THEN 29 WHEN 'NATIVE HAWAIIAN OR OTHER PACIFIC ISLANDER' THEN 30
+                    END
+                )
+        FROM admissions
+        WHERE
+            admissions.hadm_id = ${project_name}.hadm_id;
+    </update>
+
+    <update id="addEthnicity">
+        UPDATE ${project_name}
+        SET ethnicity = (
+            CASE
+            WHEN ad.ethnicity = 'UNKNOWN/NOT SPECIFIED' OR ad.ethnicity = 'UNABLE TO OBTAIN' OR ad.ethnicity = 'PATIENT DECLINED TO ANSWER' THEN 1
+            WHEN ad.ethnicity ILIKE '%BLACK%' THEN 2
+            WHEN ad.ethnicity ILIKE '%ASIAN%' THEN 3
+            WHEN ad.ethnicity ILIKE '%WHITE%' THEN 4
+            WHEN ad.ethnicity ILIKE '%HISPANIC/LATINO%' THEN 5
+            ELSE 6
+            END
+        )
+        FROM admissions AS ad
+        WHERE
+            ad.hadm_id = ${project_name}.hadm_id;
+    </update>
+
+    <update id="addAdmissionType">
+        UPDATE ${project_name}
+            SET admission_type = (CASE adm.admission_type
+                WHEN 'URGENT' THEN 0
+                WHEN 'ELECTIVE' THEN 1
+                WHEN 'EMERGENCY' THEN 2
+                END
+            )
+        FROM admissions adm WHERE ${project_name}.hadm_id = adm.hadm_id;
+    </update>
+    
+    <update id="addHospitalExpireFlag">
+        UPDATE ${project_name} SET hospital_expire_flag = admissions.hospital_expire_flag FROM admissions WHERE admissions.hadm_id = ${project_name}.hadm_id;
+    </update>
+
+    <update id="addLabeventAverValue">
+        WITH lab AS
+        (
+                SELECT labevents.subject_id, labevents.hadm_id, avg(labevents.valuenum) AS ${field_name}
+                FROM labevents, ${project_name}
+                WHERE ${condition} AND labevents.hadm_id = ${project_name}.hadm_id
+                GROUP BY labevents.subject_id, labevents.hadm_id
+        )
+        UPDATE ${project_name} SET ${field_name} = ROUND(CAST(lab.${field_name} AS numeric),  4)
+        FROM lab WHERE lab.hadm_id = ${project_name}.hadm_id;
+    </update>
+
+    <update id="addLabeventMaxValue">
+        WITH lab AS
+        (
+                SELECT labevents.subject_id, labevents.hadm_id, MAX(labevents.valuenum) AS ${field_name}
+                FROM labevents, ${project_name}
+                WHERE ${condition} AND labevents.hadm_id = ${project_name}.hadm_id
+                GROUP BY labevents.subject_id, labevents.hadm_id
+        )
+        UPDATE ${project_name} SET ${field_name} = ROUND(CAST(lab.${field_name} AS numeric),  4)
+        FROM lab WHERE lab.hadm_id = ${project_name}.hadm_id;
+    </update>
+
+    <update id="addLabeventMinValue">
+        WITH lab AS
+        (
+                SELECT labevents.subject_id, labevents.hadm_id, MIN(labevents.valuenum) AS ${field_name}
+                FROM labevents, ${project_name}
+                WHERE ${condition} AND labevents.hadm_id = ${project_name}.hadm_id
+                GROUP BY labevents.subject_id, labevents.hadm_id
+        )
+        UPDATE ${project_name} SET ${field_name} = ROUND(CAST(lab.${field_name} AS numeric),  4)
+        FROM lab WHERE lab.hadm_id = ${project_name}.hadm_id;
+    </update>
+
+    <update id="addElixhauserAhrqValue">
+        UPDATE ${project_name} SET ${field_name} = elixhauser_ahrq.${field_name} FROM elixhauser_ahrq
+        WHERE ${project_name}.hadm_id = elixhauser_ahrq.hadm_id
+    </update>
+
+    <update id="addHospitalDeathDays">
+        UPDATE ${project_name} SET ${field_name} = 1 FROM mortailty my
+        WHERE my.hadm_id::INT = ${project_name}.hadm_id AND my.dod &lt; my.admittime + interval ${days} day;
+        UPDATE ${project_name} SET ${field_name} = 0 WHERE ${field_name} IS NULL;
+    </update>
+</mapper>

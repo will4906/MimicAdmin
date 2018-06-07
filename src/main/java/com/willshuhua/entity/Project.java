@@ -260,17 +260,20 @@ public class Project {
             case "red_blood_cell":
                 this.projectMapper.addField(this.projectName, fieldName, "NUMERIC");
                 this.icustayMapper.addSumInputeventCvValue(this.projectName, fieldName, "itemid = 225168");
-                this.icustayMapper.addSumInputeventMvValue(this.projectName, fieldName, "itemid = 225168");
+                this.icustayMapper.addSumInputeventMvValue(this.projectName, fieldName, "itemid = 220996");
+                this.selfMapper.addSelfCustomCondition(this.projectName, "red_blood_cell", "0 WHERE red_blood_cell IS NULL");
                 break;
             case "plasma":
                 this.projectMapper.addField(this.projectName, fieldName, "NUMERIC");
                 this.icustayMapper.addSumInputeventCvValue(this.projectName, fieldName, "itemid IN (30005, 30180, 30103, 44236, 43009, 46530, 220970)");
                 this.icustayMapper.addSumInputeventMvValue(this.projectName, fieldName, "itemid IN (30005, 30180, 30103, 44236, 43009, 46530, 220970)");
+                this.selfMapper.addSelfCustomCondition(this.projectName, "plasma", "0 WHERE plasma IS NULL");
                 break;
             case "cryoprecipitate":
                 this.projectMapper.addField(this.projectName, fieldName, "NUMERIC");
                 this.icustayMapper.addSumInputeventCvValue(this.projectName, fieldName, "itemid IN (30007, 45354, 225171, 226371)");
                 this.icustayMapper.addSumInputeventMvValue(this.projectName, fieldName, "itemid IN (30007, 45354, 225171, 226371)");
+                this.selfMapper.addSelfCustomCondition(this.projectName, "cryoprecipitate", "0 WHERE cryoprecipitate IS NULL");
                 break;
             case "albumin_drup":
                 this.projectMapper.addField(this.projectName, fieldName, "VARCHAR(255)");
@@ -363,6 +366,17 @@ public class Project {
             case "bmi":
                 this.projectMapper.addField(this.projectName, fieldName, "NUMERIC");
                 this.icustayMapper.addCustomConditionSetValue(this.projectName, "heightweight", "ROUND(heightweight.weight_first / POWER(heightweight.height_first / 100, 2) , 2)", fieldName, "1=1");
+                break;
+            case "transfusion":
+                this.projectMapper.addField(this.projectName, fieldName, "NUMERIC");
+                this.selfMapper.addSelfCustomCondition(this.projectName, "red_blood_cell", "0 WHERE red_blood_cell IS NULL");
+                this.selfMapper.addSelfCustomCondition(this.projectName, "plasma", "0 WHERE plasma IS NULL");
+                this.selfMapper.addSelfCustomCondition(this.projectName, "cryoprecipitate", "0 WHERE cryoprecipitate IS NULL");
+                this.selfMapper.addSelfCustomCondition(this.projectName, fieldName, "red_blood_cell + plasma + cryoprecipitate");
+                break;
+            case "icu_duration":
+                this.projectMapper.addField(this.projectName, fieldName, "NUMERIC");
+                this.selfMapper.addSelfCustomCondition(this.projectName, fieldName, "EXTRACT(DAY FROM icustays.outtime - icustays.intime) FROM icustays WHERE icustays.icustay_id = " + this.projectName + ".icustay_id;");
                 break;
             default:
                 System.out.println("暂未支持：" + fieldName);

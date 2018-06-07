@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.willshuhua.dao.ProjectMapper">
+    <update id="createProjectByIcd9Code">
+        DROP TABLE IF EXISTS ${project_name} CASCADE ;
+        CREATE TABLE ${project_name} AS (
+            WITH info AS (
+                    SELECT
+                        DISTINCT di.subject_id, di.hadm_id
+                    FROM
+                        diagnoses_icd AS di
+                    WHERE ${condition}
+            )
+            SELECT
+                ai.subject_id, ai.hadm_id, icu.icustay_id
+            FROM
+                icustays icu, info ai
+            WHERE
+                icu.subject_id = ai.subject_id
+                AND
+                icu.hadm_id = ai.hadm_id
+        )
+    </update>
+
+    <select id="selectProjectCounts" resultType="java.lang.Integer">
+        SELECT count(*) FROM ${project_name}
+    </select>
+
+    <update id="addField">
+        ALTER TABLE ${project_name} ADD ${field} ${type};
+    </update>
+
+    <delete id="deleteInstance">
+        DELETE FROM ${project_name} WHERE ${condition}
+    </delete>
+</mapper>

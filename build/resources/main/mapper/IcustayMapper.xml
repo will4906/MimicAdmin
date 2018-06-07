@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.willshuhua.dao.IcustayMapper">
+    <update id="addSofaValue">
+        UPDATE ${project_name} SET ${field_name} = sofa.${field_name} FROM sofa WHERE sofa.icustay_id = ${project_name}.icustay_id
+    </update>
+
+    <update id="addSapsiiValue">
+        UPDATE ${project_name} SET ${field_name} = sapsii.${field_name} FROM sapsii WHERE sapsii.icustay_id = ${project_name}.icustay_id
+    </update>
+
+    <update id="addSumVentDurationHours">
+        WITH vent AS (
+                SELECT ventdurations.icustay_id, ROUND(sum(ventdurations.duration_hours::NUMERIC), 4) AS ${field_name} FROM ventdurations, ${project_name}
+                WHERE ventdurations.icustay_id = ${project_name}.icustay_id
+                GROUP BY ventdurations.icustay_id
+        )
+        UPDATE ${project_name} SET ${field_name} = vent.${field_name} FROM vent WHERE vent.icustay_id = ${project_name}.icustay_id;
+    </update>
+
+    <update id="addMaxCharteventValue">
+        WITH chart AS (
+            SELECT chartevents.icustay_id, max(chartevents.valuenum::numeric) AS ${field_name} FROM chartevents, ${project_name}
+            WHERE ${project_name}.icustay_id = chartevents.icustay_id AND ${condition}
+            GROUP BY chartevents.icustay_id
+        )
+        UPDATE ${project_name} SET ${field_name} = chart.${field_name} FROM chart WHERE chart.icustay_id = ${project_name}.icustay_id
+    </update>
+
+    <update id="addAverCharteventValue">
+        WITH chart AS (
+                SELECT chartevents.icustay_id, ROUND(avg(chartevents.valuenum::numeric), 4) AS ${field_name} FROM chartevents, ${project_name}
+                WHERE ${project_name}.icustay_id = chartevents.icustay_id AND ${condition}
+                GROUP BY chartevents.icustay_id
+        )
+        UPDATE ${project_name} SET ${field_name} = chart.${field_name} FROM chart WHERE chart.icustay_id = ${project_name}.icustay_id
+    </update>
+
+    <update id="addMinCharteventValue">
+        WITH chart AS (
+                SELECT chartevents.icustay_id, MIN(chartevents.valuenum::numeric) AS ${field_name} FROM chartevents, ${project_name}
+                WHERE ${project_name}.icustay_id = chartevents.icustay_id AND ${condition}
+                GROUP BY chartevents.icustay_id
+        )
+        UPDATE ${project_name} SET ${field_name} = chart.${field_name} FROM chart WHERE chart.icustay_id = ${project_name}.icustay_id
+    </update>
+
+    <update id="addCustomValue">
+        UPDATE ${project_name} SET ${field_name} = ${source}.${field_name} FROM ${source} WHERE ${project_name}.icustay_id = ${source}.icustay_id
+    </update>
+
+    <update id="addCustomConditionValue">
+        UPDATE ${project_name}
+        SET ${field_name} = ${source}.${source_field}
+        FROM ${source}
+        WHERE ${project_name}.icustay_id = ${source}.icustay_id AND ${condition}
+    </update>
+    <!--如果存在需要两张inputevent表格拼接的我们约定先处理cv后处理mv-->
+    <update id="addSumInputeventCvInput">
+        WITH cv AS (
+            SELECT inputevents_cv.icustay_id, sum(amount) AS amount FROM inputevents_cv, ${project_name}
+            WHERE inputevents_cv.icustay_id = ${project_name}.icustay_id
+            GROUP BY inputevents_cv.icustay_id
+        )
+        UPDATE ${project_name} SET ${field_name} = cv.amount FROM cv WHERE ${project_name}.icustay_id = cv.icustay_id;
+        UPDATE ${project_name} SET ${field_name} = 0 WHERE ${field_name} IS NULL;
+    </update>
+
+    <update id="addSumInputeventMvInput">
+        WITH mv AS (
+                SELECT inputevents_mv.icustay_id, sum(amount) AS amount FROM inputevents_mv, ${project_name}
+                WHERE inputevents_mv.icustay_id = ${project_name}.icustay_id
+                GROUP BY inputevents_mv.icustay_id
+        )
+        UPDATE ${project_name} SET ${field_name} = mv.amount + ${field_name} FROM mv WHERE ${project_name}.icustay_id = mv.icustay_id;
+    </update>
+
+    <update id="addSumInputeventCvValue">
+        WITH cv AS (
+                SELECT icv.icustay_id, sum(icv.amount) AS amount FROM inputevents_cv AS icv, ${project_name}
+                WHERE ${condition} AND icv.icustay_id = ${project_name}.icustay_id GROUP BY icv.icustay_id
+        )
+        UPDATE ${project_name} SET ${field_name} = cv.amount FROM cv WHERE cv.icustay_id = ${project_name}.icustay_id;
+        UPDATE ${project_name} SET ${field_name} = 0 WHERE ${field_name} IS NULL;
+    </update>
+
+    <update id="addSumInputeventMvValue">
+        WITH mv AS  (
+                SELECT imv.icustay_id, sum(imv.amount) AS amount FROM inputevents_mv AS imv, ${project_name}
+                WHERE ${condition} AND imv.icustay_id = ${project_name}.icustay_id GROUP BY imv.icustay_id
+        )
+        UPDATE ${project_name} SET ${field_name} = mv.amount + ${field_name} FROM mv WHERE mv.icustay_id = ${project_name}.icustay_id;
+    </update>
+
+    <update id="addSumOutputeventOutput">
+        WITH out AS (
+            SELECT o.icustay_id, SUM(o.value) AS output FROM outputevents AS o, ${project_name}
+            WHERE o.icustay_id = ${project_name}.icustay_id
+            GROUP BY o.icustay_id
+        )
+        UPDATE ${project_name} SET output = out.output FROM out WHERE ${project_name}.icustay_id = out.icustay_id;
+    </update>
+
+    <update id="addSelfCustomCondition">
+        UPDATE ${project_name} SET ${field_name} = ${condition};
+    </update>
+
+
+</mapper>

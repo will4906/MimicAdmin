@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.willshuhua.dao.SelfMapper">
+    <update id="addSelfCustomCondition">
+        UPDATE ${project_name} SET ${field_name} = ${condition};
+    </update>
+
+    <update id="addSelfApps">
+        WITH apps_temp AS (
+        SELECT
+        icustay_id,
+        CASE
+        WHEN age &lt; 47 THEN 1
+        WHEN age >= 47 AND age &lt;= 66 THEN 2
+        WHEN age > 66 THEN 3
+        END AS age_score,
+
+        CASE
+        WHEN pao2fio2 > 158 THEN 1
+        WHEN pao2fio2 &lt;=158 AND pao2fio2 >= 105 THEN 2
+        WHEN pao2fio2 &lt; 105 THEN 3
+        END AS p_score,
+
+        CASE
+        WHEN plateau_pressure_max &lt; 27 THEN 1
+        WHEN plateau_pressure_max >= 27 AND plateau_pressure_max &lt;= 30 THEN 2
+        WHEN plateau_pressure_max > 30 THEN 3
+        END AS pp_score
+        FROM
+        ${project_name}
+        )
+        UPDATE ${project_name} SET apps = (apps_temp.age_score + apps_temp.p_score + apps_temp.pp_score)
+        FROM
+        apps_temp
+        WHERE ${project_name}.icustay_id = apps_temp.icustay_id
+        AND
+              peep_max >= 10 AND pfio2 >= 50;
+    </update>
+
+</mapper>

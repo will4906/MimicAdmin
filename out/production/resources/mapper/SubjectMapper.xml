@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.willshuhua.dao.SubjectMapper">
+    <update id="addAges">
+        UPDATE ${project_name}
+        SET age = ROUND((CAST(EXTRACT(EPOCH FROM adm.admittime - pat.dob) / (60 * 60 * 24 * 365.242) AS NUMERIC)), 1)
+        FROM
+        admissions adm, patients pat
+        WHERE adm.subject_id = ${project_name}.subject_id
+        AND
+        pat.subject_id = ${project_name}.subject_id;
+    </update>
+
+    <!--gender：性别，0：female, 1: male-->
+    <update id="addGenders">
+        UPDATE ${project_name}
+        SET gender = (CASE patients.gender WHEN 'F' THEN 0 WHEN 'M' THEN 1 ELSE NULL END )
+        FROM patients
+        WHERE patients.subject_id = ${project_name}.subject_id;
+    </update>
+</mapper>
