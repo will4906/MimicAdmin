@@ -1,7 +1,9 @@
 package com.willshuhua.demo;
 
+import java.io.IOException;
+
 public interface IDemo {
 
-    void createProject();
+    void createProject() throws IOException, InterruptedException;
 
 }

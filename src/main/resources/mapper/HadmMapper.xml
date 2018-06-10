@@ -105,4 +105,14 @@
         WHERE my.hadm_id::INT = ${project_name}.hadm_id AND my.dod &lt; my.admittime + interval ${days} day;
         UPDATE ${project_name} SET ${field_name} = 0 WHERE ${field_name} IS NULL;
     </update>
+
+    <update id="addFlagByIcd9Code">
+        WITH temp AS (
+            SELECT diagnoses_icd.hadm_id FROM d_icd_diagnoses, diagnoses_icd
+            WHERE diagnoses_icd.icd9_code = d_icd_diagnoses.icd9_code
+            AND ${condition}
+        )
+        UPDATE ${project_name} SET ${field_name} = 1 FROM temp WHERE temp.hadm_id = ${project_name}.hadm_id;
+        UPDATE ${project_name} SET ${field_name} = 0 WHERE ${field_name} IS NULL;
+    </update>
 </mapper>

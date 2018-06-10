@@ -46,7 +46,7 @@ public class ARDS {
 //            for (String e : elixhauserAhrqs){
 //                project.addRelatedData(e);
 //            }
-//            project.addRelatedData("sofa");
+            project.addRelatedData("sofa");
 //            project.addRelatedData("respiration");
 //            project.addRelatedData("sapsii");
 //            project.addRelatedData("ph_mean");
@@ -101,7 +101,7 @@ public class ARDS {
 //            System.out.println("删除mean_airway_press为空的人，共" + project.deleteInstance("mean_airway_press_min IS NULL") + "个");
 //            System.out.println("删除apps为空的人，共" + project.deleteInstance("apps IS NULL") + "个");
 //            project.addRelatedData("transfusion");
-            project.addRelatedData("icu_duration");
+//            project.addRelatedData("icu_duration");
             sqlSession.commit();
         } catch (Exception ex) {
             System.out.println(ex.toString());

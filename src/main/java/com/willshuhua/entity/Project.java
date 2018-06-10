@@ -209,6 +209,7 @@ public class Project {
             case "respiration":
                 this.projectMapper.addField(this.projectName, fieldName, "INT4");
                 this.icustayMapper.addSofaValue(this.projectName, fieldName);
+                break;
             case "sapsii":
                 this.projectMapper.addField(this.projectName, fieldName, "INT4");
                 this.icustayMapper.addSapsiiValue(this.projectName, fieldName);
@@ -252,6 +253,7 @@ public class Project {
             case "gcs_score":
                 this.projectMapper.addField(this.projectName, fieldName, "INT");
                 this.icustayMapper.addCustomValue(this.projectName, "sapsii", fieldName);
+                break;
             case "input":
                 this.projectMapper.addField(this.projectName, fieldName, "NUMERIC");
                 this.icustayMapper.addSumInputeventCvInput(this.projectName, fieldName);
@@ -374,9 +376,13 @@ public class Project {
                 this.selfMapper.addSelfCustomCondition(this.projectName, "cryoprecipitate", "0 WHERE cryoprecipitate IS NULL");
                 this.selfMapper.addSelfCustomCondition(this.projectName, fieldName, "red_blood_cell + plasma + cryoprecipitate");
                 break;
-            case "icu_duration":
+            case "icu_days":
                 this.projectMapper.addField(this.projectName, fieldName, "NUMERIC");
                 this.selfMapper.addSelfCustomCondition(this.projectName, fieldName, "EXTRACT(DAY FROM icustays.outtime - icustays.intime) FROM icustays WHERE icustays.icustay_id = " + this.projectName + ".icustay_id;");
+                break;
+            case "icp":
+                this.projectMapper.addField(this.projectName, fieldName, "INT2");
+                this.hadmMapper.addFlagByIcd9Code(this.projectName, fieldName, "d_icd_diagnoses.icd9_code ILIKE '584%'");
                 break;
             default:
                 System.out.println("暂未支持：" + fieldName);

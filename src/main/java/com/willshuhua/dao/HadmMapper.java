@@ -80,4 +80,12 @@ public interface HadmMapper {
      */
     void addHospitalDeathDays(@Param("project_name")String projectName, @Param("field_name")String fieldName, @Param("days")String days);
 
+    /**
+     * 根据icd9code为表格添加flag(1 / 0)
+     * @param projectName 表名
+     * @param fieldName 字段
+     * @param condition 条件，如 = icd9code, ILIKE '%icd9code%'等
+     */
+    void addFlagByIcd9Code(@Param("project_name")String projectName, @Param("field_name")String fieldName, @Param("condition")String condition);
+
 }
