@@ -35,4 +35,8 @@
     <delete id="deleteInstance">
         DELETE FROM ${project_name} WHERE ${condition}
     </delete>
+
+    <update id="almostCustomUpdate">
+        UPDATE ${project_name} SET ${field_name} = ${set_content} FROM ${source_table} WHERE ${condition}
+    </update>
 </mapper>

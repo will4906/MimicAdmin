@@ -35,4 +35,14 @@ public interface ProjectMapper {
      * @param condition 条件例如age < 18
      */
     int deleteInstance(@Param("project_name")String projectName, @Param("condition")String condition);
+
+    /**
+     * 几乎完全自定义的更新
+     * @param projectName
+     * @param field
+     * @param setContent
+     * @param sourceTable
+     * @param condition
+     */
+    void almostCustomUpdate(@Param("project_name")String projectName, @Param("field") String field, @Param("set_content") String setContent, @Param("source_table") String sourceTable, @Param("condition")String condition);
 }

@@ -30,6 +30,10 @@ public class Head implements IDemo{
 //        project.addRelatedData("icp");
 //        project.addRelatedData("vent_hours");
 //        project.addRelatedData("icu_days");
+//        project.addRelatedData("mannitol_days");
+//        project.addRelatedData("mannitol_dosage");
+        project.addRelatedData("albumin_drup");
+        project.addRelatedData("bmi");
         try {
             sqlSession.commit();
         } catch (Exception ex) {

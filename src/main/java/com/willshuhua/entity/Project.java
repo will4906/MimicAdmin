@@ -281,6 +281,14 @@ public class Project {
                 this.projectMapper.addField(this.projectName, fieldName, "VARCHAR(255)");
                 this.icustayMapper.addCustomConditionValue(this.projectName, "prescriptions", "dose_val_rx", fieldName, "drug ILIKE '%albumin%'");
                 break;
+            case "mannitol_days":
+                this.projectMapper.addField(this.projectName, fieldName, "INT4");
+                this.icustayMapper.addCustomConditionSetValue(this.projectName, "prescriptions", "EXTRACT(DAY FROM (prescriptions.enddate - prescriptions.startdate))", fieldName, "prescriptions.drug ILIKE '%mannitol%'");
+                break;
+            case "mannitol_dosage":
+                this.projectMapper.addField(this.projectName, fieldName, "NUMERIC");
+                this.icustayMapper.addCustomConditionSetValue(this.projectName, "prescriptions", "prescriptions.dose_val_rx::numeric", fieldName, "prescriptions.drug ILIKE '%mannitol%'");
+                break;
             case "mean_airway_press_min":
                 this.projectMapper.addField(this.projectName, fieldName, "NUMERIC");
                 this.icustayMapper.addMinCharteventValue(this.projectName, fieldName, "itemid IN (444, 1672, 224697)");
