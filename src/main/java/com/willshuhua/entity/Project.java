@@ -392,6 +392,29 @@ public class Project {
                 this.projectMapper.addField(this.projectName, fieldName, "INT2");
                 this.hadmMapper.addFlagByIcd9Code(this.projectName, fieldName, "d_icd_diagnoses.icd9_code ILIKE '584%'");
                 break;
+            case "base_excess_max":
+                this.projectMapper.addField(this.projectName, fieldName, "NUMERIC");
+                this.hadmMapper.addLabeventMaxValue(this.projectName, fieldName, "itemid = 50802");
+                break;
+            case "diasbp_min":
+                this.projectMapper.addField(this.projectName, fieldName, "NUMERIC");
+                this.icustayMapper.addMinCharteventValue(this.projectName, fieldName, "itemid in (8368,8440,8441,8555,220180,220051) and valuenum > 0 and valuenum < 300");
+                break;
+            case "shock_at_ed_le_60":
+//                le means lower then
+//                此项需先执行diasbp_min
+                this.projectMapper.addField(this.projectName, fieldName, "INT2");
+                this.selfMapper.addSelfCustomCondition(this.projectName, fieldName, "1 WHERE diasbp_min < 60");
+                this.selfMapper.addSelfCustomCondition(this.projectName, fieldName, "0 WHERE " + fieldName + " IS NULL");
+                break;
+            case "intravenous_contrast_medium_flag":
+                this.projectMapper.addField(this.projectName, fieldName, "INT2");
+                this.icustayMapper.addPrescriptionsFlag(this.projectName, fieldName, "drug ILIKE '%meglumine%'");
+                break;
+            case "aminoglysosides_flag":
+                this.projectMapper.addField(this.projectName, fieldName, "INT2");
+                this.icustayMapper.addPrescriptionsFlag(this.projectName, fieldName, "( drug = 'Tobramycin Sulfate' OR drug = 'Tobramycin' OR drug = 'tobramycin' OR drug = 'Streptomycin Sulfate' OR drug = 'Gentamicin' OR drug = 'Gentamicin ' OR drug = 'Gentamicin Sulfate' OR drug = 'Amikacin' )");
+                break;
             default:
                 System.out.println("暂未支持：" + fieldName);
                 break;

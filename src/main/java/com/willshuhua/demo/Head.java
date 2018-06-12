@@ -32,8 +32,14 @@ public class Head implements IDemo{
 //        project.addRelatedData("icu_days");
 //        project.addRelatedData("mannitol_days");
 //        project.addRelatedData("mannitol_dosage");
-        project.addRelatedData("albumin_drup");
-        project.addRelatedData("bmi");
+//        project.addRelatedData("albumin_drup");
+//        project.addRelatedData("bmi");
+//        project.addRelatedData("base_excess_max");
+//        下面两项shock_at_ed_le_60依赖于diasbp_min
+//        project.addRelatedData("diasbp_min");
+//        project.addRelatedData("shock_at_ed_le_60");
+//        project.addRelatedData("intravenous_contrast_medium_flag");
+//        project.addRelatedData("aminoglysosides_flag");
         try {
             sqlSession.commit();
         } catch (Exception ex) {

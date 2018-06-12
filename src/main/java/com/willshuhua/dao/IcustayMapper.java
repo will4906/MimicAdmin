@@ -113,4 +113,12 @@ public interface IcustayMapper {
      * @param condition
      */
     void addCustomConditionSetValue(@Param("project_name")String projectName, @Param("source")String source, @Param("expression")String expression, @Param("field_name")String fieldName, @Param("condition")String condition);
+
+    /**
+     * 从prescriptions表格中添加flag
+     * @param projectName
+     * @param fieldName
+     * @param condition
+     */
+    void addPrescriptionsFlag(@Param("project_name")String projectName, @Param("field_name")String fieldName, @Param("condition")String condition);
 }
