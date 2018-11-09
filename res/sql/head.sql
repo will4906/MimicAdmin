@@ -1304,3 +1304,7 @@ UPDATE head_whole SET kdigo_stage_7day_creat = NULL;
 UPDATE head_whole SET kdigo_stage_7day_creat = head_kdigo_creatinine.stage 
 FROM head_kdigo_creatinine WHERE head_whole.hadm_id = head_kdigo_creatinine.hadm_id;
 UPDATE head_whole SET kdigo_stage_7day_creat = 0 WHERE kdigo_stage_7day_creat IS NULL;
+
+DELETE FROM head_whole WHERE uo_6hr IS NULL;
+DELETE FROM head_whole WHERE uo_12hr IS NULL;
+DELETE FROM head_whole WHERE uo_24hr IS NULL;

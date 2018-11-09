@@ -22,10 +22,10 @@ public class ARDS {
         Project project = new Project(this.projectName, sqlSession);
 
 //        project.createProjectByIcd9Code("icd9_code ILIKE '5185%' OR icd9_code = '51882'");
-//        System.out.println("总实例数为" + project.selectProjectCounts());
+        System.out.println("总实例数为" + project.selectProjectCounts());
         try {
 //            project.addRelatedData("age");
-//            System.out.println("删除年龄小于18岁的人，共" + project.deleteInstance("age < 18") + "个");
+            System.out.println("删除年龄小于18岁的人，共" + project.deleteInstance("age < 18") + "个");
 //            project.addRelatedData("gender");
 //            project.addRelatedData("ethnicity");
 //            project.addRelatedData("admission_type");
@@ -46,7 +46,7 @@ public class ARDS {
 //            for (String e : elixhauserAhrqs){
 //                project.addRelatedData(e);
 //            }
-            project.addRelatedData("sofa");
+//            project.addRelatedData("sofa");
 //            project.addRelatedData("respiration");
 //            project.addRelatedData("sapsii");
 //            project.addRelatedData("ph_mean");
@@ -98,8 +98,8 @@ public class ARDS {
 //            project.addRelatedData("spo2fio2");
 //            project.addRelatedData("osi");
 //            project.addRelatedData("bmi");
-//            System.out.println("删除mean_airway_press为空的人，共" + project.deleteInstance("mean_airway_press_min IS NULL") + "个");
-//            System.out.println("删除apps为空的人，共" + project.deleteInstance("apps IS NULL") + "个");
+            System.out.println("删除mean_airway_press为空的人，共" + project.deleteInstance("mean_airway_press_min IS NULL") + "个");
+            System.out.println("删除apps为空的人，共" + project.deleteInstance("apps IS NULL") + "个");
 //            project.addRelatedData("transfusion");
 //            project.addRelatedData("icu_duration");
             sqlSession.commit();
@@ -110,6 +110,10 @@ public class ARDS {
             sqlSession.close();
         }
 
-
+/**
+ * 总实例数3260
+ * 删除年龄小于18的8个
+ *
+ */
     }
 }

@@ -53,7 +53,7 @@ public class Project {
         return this.projectMapper.deleteInstance(this.projectName, condition);
     }
 
-    public void addRelatedData(String fieldName) throws IOException, InterruptedException {
+    public void  addRelatedData(String fieldName) throws IOException, InterruptedException {
         switch (fieldName){
             case "age":
                 this.projectMapper.addField(this.projectName, fieldName, "NUMERIC");
@@ -147,6 +147,10 @@ public class Project {
             case "hemoglobin_mean":
                 this.projectMapper.addField(this.projectName, fieldName, "NUMERIC");
                 this.hadmMapper.addLabeventAverValue(this.projectName, fieldName, "itemid = 50811");
+                break;
+            case "hemoglobin_min":
+                this.projectMapper.addField(this.projectName, fieldName, "NUMERIC");
+                this.hadmMapper.addLabeventMinValue(this.projectName, fieldName, "itemid = 50811");
                 break;
             case "temperature_mean":
                 this.projectMapper.addField(this.projectName, fieldName, "NUMERIC");
@@ -261,8 +265,8 @@ public class Project {
                 break;
             case "red_blood_cell":
                 this.projectMapper.addField(this.projectName, fieldName, "NUMERIC");
-                this.icustayMapper.addSumInputeventCvValue(this.projectName, fieldName, "itemid = 225168");
-                this.icustayMapper.addSumInputeventMvValue(this.projectName, fieldName, "itemid = 220996");
+                this.icustayMapper.addSumInputeventCvValue(this.projectName, fieldName, "(itemid = 225168 OR itemid = 220996)");
+                this.icustayMapper.addSumInputeventMvValue(this.projectName, fieldName, "(itemid = 225168 OR itemid = 220996)");
                 this.selfMapper.addSelfCustomCondition(this.projectName, "red_blood_cell", "0 WHERE red_blood_cell IS NULL");
                 break;
             case "plasma":
@@ -337,6 +341,7 @@ public class Project {
                 break;
             case "pao2fio2":
                 this.projectMapper.addField(this.projectName, fieldName, "NUMERIC");
+                System.out.println(fieldName + " 需要执行python文件");
 //                好像跑python代码有问题，建议直接调用Python文件
 //                PythonUtil.doPython("res/python/pao2fio2.py", new String[]{this.projectName});
 //                this.icustayMapper.addSelfCustomCondition(this.projectName, fieldName, "output - input");
@@ -344,6 +349,7 @@ public class Project {
 //                计算pao2fio2时的fio2
             case "pfio2":
                 this.projectMapper.addField(this.projectName, fieldName, "NUMERIC");
+                System.out.println(fieldName + " 需要执行python文件");
 //                好像跑python代码有问题，建议直接调用Python文件
 //                PythonUtil.doPython("res/python/fio2.py", new String[]{this.projectName});
 //                this.icustayMapper.addSelfCustomCondition(this.projectName, fieldName, "output - input");
@@ -367,6 +373,7 @@ public class Project {
                 break;
             case "spo2fio2":
                 this.projectMapper.addField(this.projectName, fieldName, "NUMERIC");
+                System.out.println(fieldName + " 需要执行python文件");
 //                此处调用python spo2fio2.py project_name
                 break;
             case "osi":
@@ -388,9 +395,21 @@ public class Project {
                 this.projectMapper.addField(this.projectName, fieldName, "NUMERIC");
                 this.selfMapper.addSelfCustomCondition(this.projectName, fieldName, "EXTRACT(DAY FROM icustays.outtime - icustays.intime) FROM icustays WHERE icustays.icustay_id = " + this.projectName + ".icustay_id;");
                 break;
+            case "admit_days":
+                this.projectMapper.addField(this.projectName, fieldName, "NUMERIC");
+                this.selfMapper.addSelfCustomCondition(this.projectName, fieldName, "EXTRACT(DAY FROM admissions.dischtime - admissions.admittime) FROM admissions WHERE admissions.hadm_id = " + this.projectName + ".hadm_id;");
+                break;
             case "icp":
                 this.projectMapper.addField(this.projectName, fieldName, "INT2");
                 this.hadmMapper.addFlagByIcd9Code(this.projectName, fieldName, "d_icd_diagnoses.icd9_code ILIKE '584%'");
+                break;
+            case "anxiety":
+                this.projectMapper.addField(this.projectName, fieldName, "INT2");
+                this.hadmMapper.addFlagByIcd9Code(this.projectName, fieldName, "(short_title ILIKE '%anxiety%' OR long_title ILIKE '%anxiety%')");
+                break;
+            case "pregnancy":
+                this.projectMapper.addField(this.projectName, fieldName, "INT2");
+                this.hadmMapper.addFlagByIcd9Code(this.projectName, fieldName, "(diagnoses_icd.icd9_code BETWEEN '63000' AND '67999')");
                 break;
             case "base_excess_max":
                 this.projectMapper.addField(this.projectName, fieldName, "NUMERIC");
@@ -414,6 +433,104 @@ public class Project {
             case "aminoglysosides_flag":
                 this.projectMapper.addField(this.projectName, fieldName, "INT2");
                 this.icustayMapper.addPrescriptionsFlag(this.projectName, fieldName, "( drug = 'Tobramycin Sulfate' OR drug = 'Tobramycin' OR drug = 'tobramycin' OR drug = 'Streptomycin Sulfate' OR drug = 'Gentamicin' OR drug = 'Gentamicin ' OR drug = 'Gentamicin Sulfate' OR drug = 'Amikacin' )");
+                break;
+            case "vancomycin_flag":
+                this.projectMapper.addField(this.projectName, fieldName, "INT2");
+                this.icustayMapper.addPrescriptionsFlag(this.projectName, fieldName, "( drug = 'Vancomycin ' OR drug = 'Vancomycin' OR drug = 'Vancomycin HCl')");
+                break;
+            case "polymyxin_b_flag":
+                this.projectMapper.addField(this.projectName, fieldName, "INT2");
+                this.icustayMapper.addPrescriptionsFlag(this.projectName, fieldName, "drug = 'Polymyxin B Sulfate'");
+                break;
+            case "arb_acei_flag":
+                this.projectMapper.addField(this.projectName, fieldName, "INT2");
+                this.icustayMapper.addPrescriptionsFlag(this.projectName, fieldName, "(drug ILIKE '%losartan%' OR drug ILIKE '%valsartan%' OR drug ILIKE '%irbesartan%' OR drug ILIKE '%candesartan%' OR drug ILIKE '%captopril%' OR drug ILIKE '%candesartan%' OR drug ILIKE '%candesartan%' OR drug ILIKE '%enalapril%' OR drug ILIKE '%ramipril%' OR drug ILIKE '%benazepril%' OR drug ILIKE '%fosinopril%')");
+                break;
+            case "elixhauser_sid30":
+                this.projectMapper.addField(this.projectName, fieldName, "INT4");
+                this.hadmMapper.addTargetTableValue(this.projectName, fieldName, "elixhauser_ahrq_score", "elixhauser_sid30");
+                break;
+            case "esrd":
+                this.projectMapper.addField(this.projectName, fieldName, "INT2");
+                this.hadmMapper.addTargetTableFlag(this.projectName, fieldName, "noteevents", "noteevents.text ILIKE '%end-stage renal disease%'");
+                break;
+            case "hosp_days":
+                this.projectMapper.addField(this.projectName, fieldName, "INT4");
+                this.hadmMapper.addTargetTableCustomValue(this.projectName, fieldName, "EXTRACT(DAY FROM admissions.dischtime - admissions.admittime)", "admissions");
+                break;
+            case "live_days":
+                this.projectMapper.addField(this.projectName, fieldName, "NUMERIC");
+                this.hadmMapper.addLiveDays(this.projectName, fieldName);
+                break;
+            case "sepsis":
+                this.projectMapper.addField(this.projectName, fieldName, "INT4");
+                this.hadmMapper.addTargetTableValue(this.projectName, fieldName, "angus_sepsis", "angus");
+                break;
+            case "anisocoria":
+                this.projectMapper.addField(this.projectName, fieldName, "INT2");
+                this.hadmMapper.addTargetTableFlag(this.projectName, fieldName, "noteevents", "noteevents.text ILIKE '%Anisocoria%'");
+                break;
+            case "craniotomy":
+                this.projectMapper.addField(this.projectName, fieldName, "INT2");
+                this.hadmMapper.addTargetTableFlag(this.projectName, fieldName, "noteevents", "noteevents.text ILIKE '%craniotomy%'");
+                break;
+            case "heart_failure":
+                this.projectMapper.addField(this.projectName, fieldName, "INT2");
+                this.hadmMapper.addTargetTableFlag(this.projectName, fieldName, "diagnoses_icd", "diagnoses_icd.icd9_code = '39891' OR diagnoses_icd.icd9_code BETWEEN '4280' AND '4289'");
+                break;
+            case "atrail_fibrillation":
+                this.projectMapper.addField(this.projectName, fieldName, "INT2");
+                this.hadmMapper.addTargetTableFlag(this.projectName, fieldName, "diagnoses_icd", "diagnoses_icd.icd9_code IN ('42610', '42611', '42613', '4270', '4272', '42731', '42760', '4279', '7850') OR (diagnoses_icd.icd9_code BETWEEN '4262' AND '42653') OR (diagnoses_icd.icd9_code BETWEEN '4266' AND '42689') OR (diagnoses_icd.icd9_code BETWEEN 'V450 ' AND 'V4509') OR (diagnoses_icd.icd9_code BETWEEN 'V533 ' AND 'V5339')");
+                break;
+            case "immunocompromised":
+                this.projectMapper.addField(this.projectName,fieldName, "INT2");
+                this.hadmMapper.addTargetTableFlag(this.projectName, fieldName, "diagnoses_icd", "diagnoses_icd.icd9_code IN ( '2386 ', '2733 ') OR (diagnoses_icd.icd9_code between '042  ' and '0449 ') OR (diagnoses_icd.icd9_code between '20000' and '20238') OR (diagnoses_icd.icd9_code between '20250' and '20301') OR (diagnoses_icd.icd9_code between '20302' and '20382')");
+                break;
+            case "malignancy":
+                this.projectMapper.addField(this.projectName, fieldName, "INT2");
+                this.hadmMapper.addTargetTableFlag(this.projectName, fieldName, "diagnoses_icd", "diagnoses_icd.icd9_code IN ('20979', '78951') OR (diagnoses_icd.icd9_code between '1960 ' and '1991 ') OR (diagnoses_icd.icd9_code between '20970' and '20975')");
+                break;
+            case "bun_admin":
+                this.projectMapper.addField(this.projectName, fieldName, "NUMERIC");
+//                此处需要执行head_part.sql bun_admin相关内容
+                System.out.println(fieldName + " 需要执行sql文件");
+                break;
+            case "albumin_admin":
+                this.projectMapper.addField(this.projectName, fieldName, "NUMERIC");
+//                此处需要执行head_part.sql albumin_admin相关内容
+                System.out.println(fieldName + " 需要执行sql文件");
+                break;
+            case "coronary_artery_flag":
+                this.projectMapper.addField(this.projectName, fieldName, "INT2");
+//                此处需要执行head_part.sql coronary_artery相关内容
+                System.out.println(fieldName + " 需要执行sql文件");
+                break;
+            case "antiplate_flag":
+                this.projectMapper.addField(this.projectName, fieldName, "INT2");
+                this.icustayMapper.addPrescriptionsFlag(this.projectName, fieldName, "(drug ILIKE '%clopidogrel%' OR drug ILIKE '%Tirofiban%' OR drug ILIKE '%abciximab%' OR drug ILIKE '%aspirin%')");
+                break;
+            case "anticoaguation_flag":
+                this.projectMapper.addField(this.projectName, fieldName, "INT2");
+                this.icustayMapper.addPrescriptionsFlag(this.projectName, fieldName, "(drug ILIKE '%Warfarin%' OR drug ILIKE '%coumadin%')");
+                break;
+            case "chart_creatinine":
+//                这是一张表格用来记录肌酐和时间匹配的数值
+                this.hadmMapper.createCreatinineChart(this.projectName);
+                break;
+            case "chart_creatinine_2day":
+                this.hadmMapper.createCreatinineChart2Day(this.projectName);
+                break;
+            case "chart_creatinine_1day":
+                this.hadmMapper.createCreatinineChart1Day(this.projectName);
+                break;
+            case "stage_kdigo_creat_admin":
+//                此表需要先执行python/head_creatinine.py
+                System.out.println(fieldName + " 需要执行python文件");
+                this.projectMapper.addField(this.projectName, fieldName, "INT");
+                this.hadmMapper.addTargetTableValue(this.projectName, fieldName, this.projectName + "_kdigo_creatinine", "stage");
+                this.selfMapper.addSelfCustomCondition(this.projectName, fieldName, "0 WHERE " + fieldName + " IS NULL");
+                break;
+            case "has_kdigo":
                 break;
             default:
                 System.out.println("暂未支持：" + fieldName);

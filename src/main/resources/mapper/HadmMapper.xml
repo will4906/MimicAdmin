@@ -31,12 +31,11 @@
         UPDATE ${project_name}
         SET ethnicity = (
             CASE
-            WHEN ad.ethnicity = 'UNKNOWN/NOT SPECIFIED' OR ad.ethnicity = 'UNABLE TO OBTAIN' OR ad.ethnicity = 'PATIENT DECLINED TO ANSWER' THEN 1
-            WHEN ad.ethnicity ILIKE '%BLACK%' THEN 2
-            WHEN ad.ethnicity ILIKE '%ASIAN%' THEN 3
-            WHEN ad.ethnicity ILIKE '%WHITE%' THEN 4
-            WHEN ad.ethnicity ILIKE '%HISPANIC/LATINO%' THEN 5
-            ELSE 6
+            WHEN ad.ethnicity ILIKE '%WHITE%' THEN 1
+            WHEN ad.ethnicity ILIKE '%HISPANIC/LATINO%' THEN 2
+            WHEN ad.ethnicity ILIKE '%BLACK%' THEN 3
+            WHEN ad.ethnicity ILIKE '%ASIAN%' THEN 4
+            ELSE 5
             END
         )
         FROM admissions AS ad
@@ -114,5 +113,77 @@
         )
         UPDATE ${project_name} SET ${field_name} = 1 FROM temp WHERE temp.hadm_id = ${project_name}.hadm_id;
         UPDATE ${project_name} SET ${field_name} = 0 WHERE ${field_name} IS NULL;
+    </update>
+
+    <update id="addTargetTableValue">
+        UPDATE ${project_name} SET ${field_name} = ${source_table}.${source_field} FROM ${source_table}
+        WHERE ${project_name}.hadm_id = ${source_table}.hadm_id
+    </update>
+
+    <update id="addTargetTableFlag">
+        UPDATE ${project_name} SET ${field_name} = 1 FROM ${source_table} WHERE ${condition} AND ${source_table}.hadm_id = ${project_name}.hadm_id;
+        UPDATE ${project_name} SET ${field_name} = 0 WHERE ${field_name} IS NULL;
+    </update>
+
+    <update id="addTargetTableCustomValue">
+        UPDATE ${project_name} SET ${field_name} = ${set_expression} FROM ${source_table} WHERE ${source_table}.hadm_id = ${project_name}.hadm_id
+    </update>
+
+    <update id="addTargetTableCustomValueWithCondition">
+        UPDATE ${project_name} SET ${field_name} = ${set_expression} FROM ${source_table} WHERE ${source_table}.hadm_id = ${project_name}.hadm_id AND ${condition}
+    </update>
+
+    <update id="addLiveDays">
+        UPDATE ${project_name} SET ${field_name} = EXTRACT(DAY FROM patients.dod - admissions.admittime)
+        FROM patients, admissions
+        WHERE patients.subject_id = ${project_name}.subject_id AND admissions.hadm_id = ${project_name}.hadm_id
+    </update>
+
+    <update id="createCreatinineChart">
+        DROP TABLE IF EXISTS ${project_name}_creatinine_chart CASCADE ;
+        CREATE TABLE ${project_name}_creatinine_chart AS (
+            SELECT labevents.subject_id, labevents.hadm_id, labevents.charttime, "valuenum"::NUMERIC
+            FROM labevents, ${project_name}, admissions
+            WHERE
+                labevents.hadm_id = ${project_name}.hadm_id
+                AND labevents.itemid = 50912
+                AND valuenum IS NOT NULL
+                AND "valuenum"::NUMERIC &gt; 0
+                AND admissions.hadm_id = ${project_name}.hadm_id
+                AND labevents.charttime BETWEEN admissions.admittime - INTERVAL '6' HOUR AND admissions.admittime + INTERVAL '7' DAY
+            ORDER BY labevents.subject_id, labevents.hadm_id, labevents.charttime
+        )
+    </update>
+
+    <update id="createCreatinineChart2Day">
+        DROP TABLE IF EXISTS ${project_name}_creatinine_chart_2d CASCADE ;
+        CREATE TABLE ${project_name}_creatinine_chart_2d AS (
+        SELECT labevents.subject_id, labevents.hadm_id, labevents.charttime, "valuenum"::NUMERIC
+        FROM labevents, ${project_name}, admissions
+        WHERE
+        labevents.hadm_id = ${project_name}.hadm_id
+        AND labevents.itemid = 50912
+        AND valuenum IS NOT NULL
+        AND "valuenum"::NUMERIC &gt; 0
+        AND admissions.hadm_id = ${project_name}.hadm_id
+        AND labevents.charttime BETWEEN admissions.admittime - INTERVAL '6' HOUR AND admissions.admittime + INTERVAL '2' DAY
+        ORDER BY labevents.subject_id, labevents.hadm_id, labevents.charttime
+        )
+    </update>
+
+    <update id="createCreatinineChart1Day">
+        DROP TABLE IF EXISTS ${project_name}_creatinine_chart_1d CASCADE ;
+        CREATE TABLE ${project_name}_creatinine_chart_1d AS (
+        SELECT labevents.subject_id, labevents.hadm_id, labevents.charttime, "valuenum"::NUMERIC
+        FROM labevents, ${project_name}, admissions
+        WHERE
+        labevents.hadm_id = ${project_name}.hadm_id
+        AND labevents.itemid = 50912
+        AND valuenum IS NOT NULL
+        AND "valuenum"::NUMERIC &gt; 0
+        AND admissions.hadm_id = ${project_name}.hadm_id
+        AND labevents.charttime BETWEEN admissions.admittime - INTERVAL '6' HOUR AND admissions.admittime + INTERVAL '1' DAY
+        ORDER BY labevents.subject_id, labevents.hadm_id, labevents.charttime
+        )
     </update>
 </mapper>

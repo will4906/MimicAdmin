@@ -2,6 +2,8 @@ package com.willshuhua.dao;
 
 import org.apache.ibatis.annotations.Param;
 
+import java.sql.SQLTransactionRollbackException;
+
 /**
  * 此接口面向带hadm_id的表格，专门用来查询患者的住院信息，如种族，住院类型等
  */
@@ -81,6 +83,13 @@ public interface HadmMapper {
     void addHospitalDeathDays(@Param("project_name")String projectName, @Param("field_name")String fieldName, @Param("days")String days);
 
     /**
+     * 添加存活时间
+     * @param projectName
+     * @param fieldName
+     */
+    void addLiveDays(@Param("project_name")String projectName, @Param("field_name")String fieldName);
+
+    /**
      * 根据icd9code为表格添加flag(1 / 0)
      * @param projectName 表名
      * @param fieldName 字段
@@ -88,4 +97,58 @@ public interface HadmMapper {
      */
     void addFlagByIcd9Code(@Param("project_name")String projectName, @Param("field_name")String fieldName, @Param("condition")String condition);
 
+    /**
+     * 比较自由地添加一些表格的数据
+     * @param projectName
+     * @param fieldName
+     * @param sourceTable
+     * @param sourceField
+     */
+    void addTargetTableValue(@Param("project_name")String projectName, @Param("field_name")String fieldName, @Param("source_table")String sourceTable, @Param("source_field")String sourceField);
+
+    /**
+     * 比较自由地添加一些标志位
+     * @param projectName
+     * @param fieldName
+     * @param sourceTable
+     * @param condition
+     */
+    void addTargetTableFlag(@Param("project_name")String projectName, @Param("field_name")String fieldName, @Param("source_table")String sourceTable, @Param("condition")String condition);
+
+    /**
+     * 更加自由地添加一些表格数据
+     * @param projectName
+     * @param fieldName
+     * @param setExpression
+     * @param sourceTable
+     */
+    void addTargetTableCustomValue(@Param("project_name")String projectName, @Param("field_name")String fieldName, @Param("set_expression")String setExpression, @Param("source_table")String sourceTable);
+
+    /**
+     * 接近最灵活的添加方式
+     * @param projectName
+     * @param fieldName
+     * @param setExpression
+     * @param sourceTable
+     * @param condition
+     */
+    void addTargetTableCustomValueWithCondition(@Param("project_name")String projectName, @Param("field_name")String fieldName, @Param("set_expression")String setExpression, @Param("source_table")String sourceTable, @Param("condition")String condition);
+
+    /**
+     * 创建肌酐时间表格
+     * @param projectName
+     */
+    void createCreatinineChart(@Param("project_name")String projectName);
+
+    /**
+     * 创建两天的肌酐时间表格
+     * @param projectName
+     */
+    void createCreatinineChart2Day(@Param("project_name")String projectName);
+
+    /**
+     * 创建一天的肌酐时间表格
+     * @param projectName
+     */
+    void createCreatinineChart1Day(@Param("project_name")String projectName);
 }
